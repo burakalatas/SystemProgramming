@@ -51,7 +51,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
     // Close the archive
     fclose(archive);
 
-    printf("Archive created: %s\n", archiveName);
+    printf("The files have been merged: %s\n", archiveName);
 }
 
 void extractArchive(char* archiveName, char* directory) {
@@ -59,6 +59,16 @@ void extractArchive(char* archiveName, char* directory) {
     if (archive == NULL) {
         perror("Error opening archive file");
         exit(EXIT_FAILURE);
+    }
+
+    // Check if the directory exists
+    struct stat directoryStat;
+    if (stat(directory, &directoryStat) != 0 || !S_ISDIR(directoryStat.st_mode)) {
+        // Create the directory
+        if (mkdir(directory, 0777) != 0) {
+            perror("Error creating directory");
+            exit(EXIT_FAILURE);
+        }
     }
 
     // Read organization section size
@@ -82,9 +92,11 @@ void extractArchive(char* archiveName, char* directory) {
         fread(buffer, 1, fileInfo.size, archive);
         fwrite(buffer, 1, fileInfo.size, output);
 
+        printf("Extracted file: %s\n", fileInfo.filename);
+
         fclose(output);
     }
-
+    
     // Close the archive
     fclose(archive);
 
