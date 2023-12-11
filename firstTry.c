@@ -22,7 +22,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
 
     // Write organization section size
     size_t orgSectionSize = 0;
-    //fprintf(archive, "%010zu|", orgSectionSize);
+    fprintf(archive, "%010zu|", orgSectionSize);
 
     // Write file information
     for (int i = 0; i < fileCount; ++i) {
@@ -39,7 +39,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
         fileInfo.size = fileStat.st_size;
 
         // Write file information
-        //fprintf(archive, "%s,%o,%zu|", fileInfo.filename, fileInfo.permissions, fileInfo.size);
+        fprintf(archive, "%s,%o,%zu|", fileInfo.filename, fileInfo.permissions, fileInfo.size);
 
         // Write file contents
         FILE* input = fopen(fileNames[i], "rb");

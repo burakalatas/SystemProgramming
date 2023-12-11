@@ -20,6 +20,10 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Write organization section size
+    size_t orgSectionSize = 0;
+    fprintf(archive, "%010zu|", orgSectionSize);
+
     // Write file information
     for (int i = 0; i < fileCount; ++i) {
         // Get file information
@@ -33,6 +37,9 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
         strcpy(fileInfo.filename, fileNames[i]);
         fileInfo.permissions = fileStat.st_mode & 0777;
         fileInfo.size = fileStat.st_size;
+
+        // Write file information
+        fprintf(archive, "%s,%o,%zu|", fileInfo.filename, fileInfo.permissions, fileInfo.size);
 
         // Write file contents
         FILE* input = fopen(fileNames[i], "rb");
@@ -51,7 +58,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
     // Close the archive
     fclose(archive);
 
-    printf("The files have been merged: %s\n", archiveName);
+    printf("Archive created: %s\n", archiveName);
 }
 
 void extractArchive(char* archiveName, char* directory) {
@@ -61,19 +68,13 @@ void extractArchive(char* archiveName, char* directory) {
         exit(EXIT_FAILURE);
     }
 
-    // Check if the directory exists
-    struct stat directoryStat;
-    if (stat(directory, &directoryStat) != 0 || !S_ISDIR(directoryStat.st_mode)) {
-        // Create the directory
-        if (mkdir(directory, 0777) != 0) {
-            perror("Error creating directory");
-            exit(EXIT_FAILURE);
-        }
-    }
-
     // Read organization section size
     size_t orgSectionSize;
     fscanf(archive, "%010zu|", &orgSectionSize);
+
+    //create directory to extract files to
+    mkdir(directory, 0777);
+
 
     // Read file information
     FileInfo fileInfo;
@@ -92,11 +93,9 @@ void extractArchive(char* archiveName, char* directory) {
         fread(buffer, 1, fileInfo.size, archive);
         fwrite(buffer, 1, fileInfo.size, output);
 
-        printf("Extracted file: %s\n", fileInfo.filename);
-
         fclose(output);
     }
-    
+
     // Close the archive
     fclose(archive);
 
@@ -162,3 +161,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+

@@ -1,10 +1,10 @@
-t1
+0000000000|t1,664,13|t1
 t1 line 2
-t2
+t2,664,13|t2
 t2 line 2
-t3
+t3,664,13|t3
 t3 line 2
-t4.txt
+t4.txt,664,17|t4.txt
 t4 line 2
-t5.dat
+t5.dat,664,17|t5.dat
 t5 line 2
