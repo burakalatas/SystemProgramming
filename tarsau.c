@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #define MAX_FILES 32
 #define MAX_SIZE 200 * 1024 * 1024 // 200 MB
