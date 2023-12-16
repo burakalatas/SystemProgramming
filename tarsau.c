@@ -20,7 +20,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
         exit(EXIT_FAILURE);
     }
 
-    // The first 10 bytes hold the numerical size of the first section in ASCII.
+    // The first 10 bytes hold the numerical size of the first section in ASCII. It's now 0 it will add related size later.
     size_t orgSectionSize = 0;
     fprintf(archive, "%010zu|", orgSectionSize);
 
@@ -103,7 +103,7 @@ void extractArchive(char* archiveName, char* directory) {
     mkdir(directory, 0777);
 
     // Read file information
-    long orgSectionEnd = ftell(archive) + orgSectionSize - 1; // line 64
+    long orgSectionEnd = ftell(archive) + orgSectionSize - 1; // content's start line
 
     long location;
     FileInfo fileInfo;
@@ -123,7 +123,7 @@ void extractArchive(char* archiveName, char* directory) {
             exit(EXIT_FAILURE);
         }
 
-        //go to content line 63
+        //go to content's start line
         fseek(archive, orgSectionEnd, SEEK_SET);
 
         orgSectionEnd += fileInfo.size;
