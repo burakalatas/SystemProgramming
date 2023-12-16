@@ -131,8 +131,6 @@ void extractArchive(char* archiveName, char* directory) {
         char buffer[fileInfo.size];
         fread(buffer, 1, fileInfo.size, archive);
         fwrite(buffer, 1, fileInfo.size, outputFile);
-
-        printf("location: %ld\n", location);
         
         if(location != orgSectionEnd){
             fseek(archive, location, SEEK_SET);
