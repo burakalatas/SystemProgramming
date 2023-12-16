@@ -20,9 +20,11 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
         exit(EXIT_FAILURE);
     }
 
-    // Write organization section size
+    // The first 10 bytes hold the numerical size of the first section in ASCII.
     size_t orgSectionSize = 0;
     fprintf(archive, "%010zu|", orgSectionSize);
+
+    long orgSectionStart = ftell(archive);
 
     // Write file information
     for (int i = 0; i < fileCount; ++i) {
@@ -41,6 +43,30 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
         // Write file information
         fprintf(archive, "%s,%o,%zu|", fileInfo.filename, fileInfo.permissions, fileInfo.size);
 
+    }
+    long orgSectionEnd = ftell(archive);
+
+    long orgSize = ftell(archive) - orgSectionStart +1;
+
+    // Update organization section size
+    fseek(archive, 0, SEEK_SET);
+    fprintf(archive, "%010zu|", orgSize);
+    fseek(archive, orgSectionEnd, SEEK_SET);
+
+    //Write file contents
+    for (int i = 0; i < fileCount; ++i) {
+        // Get file information
+        struct stat fileStat;
+        if (stat(fileNames[i], &fileStat) != 0 || !S_ISREG(fileStat.st_mode)) {
+            fprintf(stderr, "%s input file format is incompatible!\n", fileNames[i]);
+            exit(EXIT_FAILURE);
+        }
+
+        FileInfo fileInfo;
+        strcpy(fileInfo.filename, fileNames[i]);
+        fileInfo.permissions = fileStat.st_mode & 0777;
+        fileInfo.size = fileStat.st_size;
+
         // Write file contents
         FILE* input = fopen(fileNames[i], "rb");
         if (input == NULL) {
@@ -54,6 +80,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
 
         fclose(input);
     }
+
 
     // Close the archive
     fclose(archive);
@@ -72,28 +99,49 @@ void extractArchive(char* archiveName, char* directory) {
     size_t orgSectionSize;
     fscanf(archive, "%010zu|", &orgSectionSize);
 
-    //create directory to extract files to
+    // Create directory to extract files to
     mkdir(directory, 0777);
 
-
     // Read file information
-    FileInfo fileInfo;
-    while (fscanf(archive, "%[^,],%o,%zu|", fileInfo.filename, &fileInfo.permissions, &fileInfo.size) == 3) {
-        // Extract the file to the specified directory
-        char outputPath[256];
-        snprintf(outputPath, sizeof(outputPath), "%s/%s", directory, fileInfo.filename);
+    long orgSectionEnd = ftell(archive) + orgSectionSize - 1; // line 64
 
-        FILE* output = fopen(outputPath, "wb");
-        if (output == NULL) {
+    long location;
+    FileInfo fileInfo;
+
+    while (fscanf(archive, "%[^,],%o,%zu|", fileInfo.filename, &fileInfo.permissions, &fileInfo.size)==3) {
+        
+        location = ftell(archive);
+
+        // Add the directory path to the filename to get the full path
+        char filePath[256];
+        snprintf(filePath, sizeof(filePath), "%s/%s", directory, fileInfo.filename);
+
+        // Create the file and write the content
+        FILE* outputFile = fopen(filePath, "wb");
+        if (outputFile == NULL) {
             perror("Error creating output file");
             exit(EXIT_FAILURE);
         }
 
+        //go to content line 63
+        fseek(archive, orgSectionEnd, SEEK_SET);
+
+        orgSectionEnd += fileInfo.size;
+
         char buffer[fileInfo.size];
         fread(buffer, 1, fileInfo.size, archive);
-        fwrite(buffer, 1, fileInfo.size, output);
+        fwrite(buffer, 1, fileInfo.size, outputFile);
 
-        fclose(output);
+        printf("location: %ld\n", location);
+        
+        if(location != orgSectionEnd){
+            fseek(archive, location, SEEK_SET);
+        }else{
+            fclose(archive);
+        }
+       
+
+        fclose(outputFile);
     }
 
     // Close the archive
@@ -101,6 +149,7 @@ void extractArchive(char* archiveName, char* directory) {
 
     printf("Files opened in the %s directory.\n", directory);
 }
+
 
 int main(int argc, char* argv[]) {
     if (argc < 4) {
