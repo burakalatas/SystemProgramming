@@ -65,7 +65,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
 
         FileInfo fileInfo;
         strcpy(fileInfo.filename, fileNames[i]);
-        fileInfo.permissions = fileStat.st_mode & 0777;
+        fileInfo.permissions = 0777;
         fileInfo.size = fileStat.st_size;
 
         // Write file contents
@@ -116,6 +116,7 @@ void extractArchive(char* archiveName, char* directory) {
         // Add the directory path to the filename to get the full path
         char filePath[256];
         snprintf(filePath, sizeof(filePath), "%s/%s", directory, fileInfo.filename);
+        chmod(filePath, 0777);
 
         // Create the file and write the content
         FILE* outputFile = fopen(filePath, "wb");
