@@ -38,7 +38,7 @@ void createArchive(char* archiveName, int fileCount, char* fileNames[]) {
 
         FileInfo fileInfo;
         strcpy(fileInfo.filename, fileNames[i]);
-        fileInfo.permissions = fileStat.st_mode & 0777;
+        fileInfo.permissions = 0777;
         fileInfo.size = fileStat.st_size;
 
         // Write file information
