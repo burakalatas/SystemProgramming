@@ -116,13 +116,14 @@ void extractArchive(char* archiveName, char* directory) {
         // Add the directory path to the filename to get the full path
         char filePath[256];
         snprintf(filePath, sizeof(filePath), "%s/%s", directory, fileInfo.filename);
-        chmod(filePath, 0777);
 
         // Create the file and write the content
         FILE* outputFile = fopen(filePath, "wb");
         if (outputFile == NULL) {
             perror("Error creating output file");
             exit(EXIT_FAILURE);
+        }else{
+            chmod(filePath, 0777);
         }
 
         //go to content's start line
@@ -152,18 +153,18 @@ void extractArchive(char* archiveName, char* directory) {
 
 
 int main(int argc, char* argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "Usage: %s -b file1 file2 ... -o archive.sau\n", argv[0]);
-        fprintf(stderr, "       %s -a archive.sau directory\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
 
     if (strcmp(argv[1], "-b") == 0) {
         char* archiveName = "a.sau"; // Default archive name
         char** fileNames = &argv[2];
         int fileCount = argc - 4;
 
+        if (argc < 4) {
+            fprintf(stderr, "Usage: %s -b file1 file2 ... -o archive.sau\n", argv[0]);
+            exit(EXIT_FAILURE);
+        } 
         
+
         if (strcmp(argv[argc - 2], "-o") == 0) {
             archiveName = argv[argc - 1];
         } else if (strcmp(argv[argc -1], "-o") == 0) {
@@ -196,6 +197,12 @@ int main(int argc, char* argv[]) {
     } else if (strcmp(argv[1], "-a") == 0) {
         if (argc != 4) {
             fprintf(stderr, "Usage: %s -a archive.sau directory\n", argv[0]);
+            exit(EXIT_FAILURE);
+        }
+        //check if archive file exists
+        FILE* archive = fopen(argv[2], "rb");
+        if (archive == NULL) {
+            printf("Archive file is inappropriate or corrupt!\n");
             exit(EXIT_FAILURE);
         }
 
