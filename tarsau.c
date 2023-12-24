@@ -153,6 +153,11 @@ void extractArchive(char* archiveName, char* directory) {
 
 
 int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s -b file1 file2 ... -o archive.sau\n", argv[0]);
+        fprintf(stderr, "       %s -a archive.sau directory\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
     if (strcmp(argv[1], "-b") == 0) {
         char* archiveName = "a.sau"; // Default archive name
