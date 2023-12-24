@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(argv[argc -1], "-o") == 0) {
             fileCount = argc - 3;
         } else {
-            fprintf(stderr, "Invalid option: %s\n", argv[argc - 2]);
+            fprintf(stderr, "Usage: %s -b file1 file2 ... -o archive.sau\n", argv[0]);
             exit(EXIT_FAILURE);
         }
         
@@ -216,7 +216,8 @@ int main(int argc, char* argv[]) {
 
         extractArchive(archiveName, directory);
     } else {
-        fprintf(stderr, "Invalid option: %s\n", argv[1]);
+        fprintf(stderr, "Usage: %s -b file1 file2 ... -o archive.sau\n", argv[0]);
+        fprintf(stderr, "       %s -a archive.sau directory\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
